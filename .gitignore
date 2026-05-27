@@ -1,0 +1,53 @@
+# Виртуальное окружение
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# База данных
+*.sqlite3
+db.sqlite3
+
+# Секреты и настройки
+.env
+.env.local
+.env.production
+
+# Бинарные файлы
+*.exe
+mc.exe
+
+# Фронтенд
+node_modules/
+dist/
+build/
+.next/
+out/
+
+# Медиа и статика
+media/
+media_files/
+staticfiles/
+static/admin/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Логи
+*.log
+logs/
+
+# Docker
+*.pid
+
+# OS
+.DS_Store
+Thumbs.db
