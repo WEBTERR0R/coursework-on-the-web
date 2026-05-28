@@ -7,6 +7,9 @@ function Breadcrumbs() {
   
   const pathNames = {
     'substance': 'Субстанция',
+    'cart': 'Корзина',
+    'login': 'Вход',
+    'register': 'Регистрация',
   }
   
   return (

@@ -14,13 +14,11 @@ function HeroVideo() {
   ]
 
   useEffect(() => {
-    // Запуск видео
     if (videoRef.current) {
       videoRef.current.muted = true
       videoRef.current.play().catch(e => console.log('Видео не запустилось автоматически', e))
     }
     
-    // Смена фраз
     const interval = setInterval(() => {
       setCurrentPhraseIndex((prev) => (prev + 1) % phrases.length)
     }, 4000)
@@ -36,7 +34,7 @@ function HeroVideo() {
         autoPlay
         muted 
         loop 
-        playsinline
+        playsInline
       >
         <source src={PROMO_VIDEO_URL} type="video/mp4" />
         Ваш браузер не поддерживает видео

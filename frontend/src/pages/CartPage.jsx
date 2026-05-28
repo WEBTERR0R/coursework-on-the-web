@@ -34,11 +34,10 @@ function CartPage() {
     setUpdating(true)
     try {
       const result = await removeFromRequest(itemId)
-      // Обновляем состояние корзины на основе ответа сервера
       setCart(prev => ({
         ...prev,
         items: prev.items.filter(item => item.id !== itemId),
-        items_count: result.items_count || prev.items_count - 1,
+        items_count: result.items_count || 0,
         total_amount: result.total_amount || 0
       }))
     } catch (error) {
@@ -48,12 +47,22 @@ function CartPage() {
     }
   }
 
-  const handleQuantityChange = async (itemId, newQuantity) => {
-    if (newQuantity < 1 || updating) return
+  const handleQuantityChange = async (itemId, delta) => {
+    if (updating) return
+    
+    // Находим текущий элемент
+    const currentItem = cart.items.find(item => item.id === itemId)
+    if (!currentItem) return
+    
+    // Вычисляем новое количество (целое число)
+    const currentQuantity = parseInt(currentItem.quantity, 10) || 1
+    const newQuantity = currentQuantity + delta
+    
+    if (newQuantity < 1) return
+    
     setUpdating(true)
     try {
       const result = await updateRequestItemQuantity(itemId, newQuantity)
-      // Обновляем состояние корзины на основе ответа сервера
       setCart(prev => ({
         ...prev,
         items: prev.items.map(item => 
@@ -64,7 +73,7 @@ function CartPage() {
         total_amount: result.total_amount || 0
       }))
     } catch (error) {
-      console.error('Ошибка обновления количества', error)
+      console.error('Ошибка обновления', error)
     } finally {
       setUpdating(false)
     }
@@ -116,15 +125,13 @@ function CartPage() {
               <span className="item-cas">CAS: {item.substance_cas}</span>
               <div className="item-quantity">
                 <button 
-                  onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                  onClick={() => handleQuantityChange(item.id, -1)}
                   disabled={updating}
-                  style={{ background: '#e2e8f0', border: 'none', borderRadius: '4px', width: '24px', cursor: 'pointer' }}
                 >-</button>
-                <span style={{ margin: '0 10px' }}>{item.quantity}</span>
+                <span>{parseInt(item.quantity, 10) || 1}</span>
                 <button 
-                  onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                  onClick={() => handleQuantityChange(item.id, +1)}
                   disabled={updating}
-                  style={{ background: '#e2e8f0', border: 'none', borderRadius: '4px', width: '24px', cursor: 'pointer' }}
                 >+</button>
               </div>
               <span className="item-price">{item.price_display || `${item.substance_price} ₽`}</span>
@@ -134,7 +141,6 @@ function CartPage() {
               onClick={() => handleRemove(item.id)} 
               className="remove-btn"
               disabled={updating}
-              style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '1.25rem', marginLeft: '1rem' }}
             >
               ✕
             </button>

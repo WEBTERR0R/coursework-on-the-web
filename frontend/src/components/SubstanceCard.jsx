@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { addToRequest } from '../services/api'
 
 const DEFAULT_IMAGE = 'https://via.placeholder.com/300x200?text=No+Image'
 
@@ -13,30 +12,22 @@ function SubstanceCard({ substance, onAddToCart }) {
     
     setAdding(true)
     try {
-      const result = await addToRequest(substance.id)
-      // Вызываем callback для обновления корзины
-      if (onAddToCart) {
-        onAddToCart()
-      }
+      await onAddToCart()
     } catch (error) {
       console.error('Ошибка добавления:', error)
-      if (error.message === 'Необходима авторизация') {
-        // Перенаправляем на логин
-        window.location.href = '/login'
-      } else {
-        alert(error.message)
-      }
     } finally {
       setAdding(false)
     }
   }
+
+  const imageUrl = substance.image_url || DEFAULT_IMAGE
 
   return (
     <article className="service-card">
       <Link to={`/substance/${substance.id}`} className="card-link">
         <div className="card-img">
           <img 
-            src={substance.image_url || DEFAULT_IMAGE} 
+            src={imageUrl} 
             alt={substance.name}
             onError={(e) => { e.target.src = DEFAULT_IMAGE }}
           />
