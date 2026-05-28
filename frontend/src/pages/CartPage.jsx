@@ -2,6 +2,25 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getCart, removeFromRequest, updateRequestItemQuantity } from '../services/api'
 
+function formatCurrency(value) {
+  const amount = Number(value)
+  return `${Number.isFinite(amount) ? amount.toFixed(2) : '0.00'} ₽`
+}
+
+function getItemTotal(item) {
+  if (item.item_total !== undefined && item.item_total !== null) {
+    return item.item_total
+  }
+  if (item.calculated_value !== undefined && item.calculated_value !== null) {
+    return item.calculated_value
+  }
+  return Number(item.substance_price || 0) * Number(item.quantity || 0)
+}
+
+function getItemTotalDisplay(item) {
+  return item.item_total_display || formatCurrency(getItemTotal(item))
+}
+
 function CartPage() {
   const [cart, setCart] = useState({ items: [], items_count: 0, total_amount: 0, request_id: null })
   const [loading, setLoading] = useState(true)
@@ -37,8 +56,8 @@ function CartPage() {
       setCart(prev => ({
         ...prev,
         items: prev.items.filter(item => item.id !== itemId),
-        items_count: result.items_count || 0,
-        total_amount: result.total_amount || 0
+        items_count: result.items_count ?? 0,
+        total_amount: result.total_amount ?? 0
       }))
     } catch (error) {
       console.error('Ошибка удаления', error)
@@ -67,10 +86,10 @@ function CartPage() {
         ...prev,
         items: prev.items.map(item => 
           item.id === itemId 
-            ? { ...item, quantity: newQuantity }
+            ? { ...item, ...(result.item || {}), quantity: result.item?.quantity ?? newQuantity }
             : item
         ),
-        total_amount: result.total_amount || 0
+        total_amount: result.total_amount ?? 0
       }))
     } catch (error) {
       console.error('Ошибка обновления', error)
@@ -134,7 +153,7 @@ function CartPage() {
                   disabled={updating}
                 >+</button>
               </div>
-              <span className="item-price">{item.price_display || `${item.substance_price} ₽`}</span>
+              <span className="item-price">{getItemTotalDisplay(item)}</span>
             </div>
             <div className="item-mm-field">м-м: {item.mm_value || '—'}</div>
             <button 

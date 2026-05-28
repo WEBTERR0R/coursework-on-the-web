@@ -10,6 +10,7 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from minio import Minio
 from django.conf import settings
+from decimal import Decimal, InvalidOperation
 import uuid
 
 from .models import User, Substance, Request, RequestItem
@@ -28,6 +29,17 @@ minio_client = Minio(
     secret_key=settings.MINIO_SECRET_KEY,
     secure=settings.MINIO_USE_SSL
 )
+
+
+def parse_quantity(value, default=1):
+    raw_value = default if value in (None, '') else value
+    try:
+        quantity = Decimal(str(raw_value))
+    except (InvalidOperation, TypeError, ValueError):
+        raise ValueError('Количество должно быть числом')
+    if quantity <= 0:
+        raise ValueError('Количество должно быть больше нуля')
+    return quantity
 
 
 # ========== АУТЕНТИФИКАЦИЯ ==========
@@ -321,6 +333,11 @@ class RequestItemViewSet(viewsets.ModelViewSet):
         
         substance_id = request.data.get('substance')
         try:
+            quantity = parse_quantity(request.data.get('quantity', 1))
+        except ValueError as error:
+            return Response({'error': str(error)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
             substance = Substance.objects.get(id=substance_id, is_active=True)
         except Substance.DoesNotExist:
             return Response({'error': 'Субстанция не найдена'}, status=status.HTTP_404_NOT_FOUND)
@@ -330,7 +347,7 @@ class RequestItemViewSet(viewsets.ModelViewSet):
             substance=substance,
             is_active=True,
             defaults={
-                'quantity': request.data.get('quantity', 1),
+                'quantity': quantity,
                 'unit': request.data.get('unit', substance.unit),
                 'mm_value': request.data.get('mm_value', f"MM-{substance.molecular_weight}"),
                 'order_number': draft.items.filter(is_active=True).count() + 1
@@ -338,7 +355,7 @@ class RequestItemViewSet(viewsets.ModelViewSet):
         )
         
         if not created:
-            item.quantity += request.data.get('quantity', 1)
+            item.quantity += quantity
             item.save()
         
         draft.calculate_total()
@@ -360,7 +377,14 @@ class RequestItemViewSet(viewsets.ModelViewSet):
         if item.request.user != request.user:
             return Response({'error': 'Нельзя изменять чужие заявки'}, 
                           status=status.HTTP_403_FORBIDDEN)
-        return super().update(request, *args, **kwargs)
+        if 'quantity' in request.data:
+            try:
+                parse_quantity(request.data.get('quantity'))
+            except ValueError as error:
+                return Response({'error': str(error)}, status=status.HTTP_400_BAD_REQUEST)
+        response = super().update(request, *args, **kwargs)
+        item.request.calculate_total()
+        return response
     
     def partial_update(self, request, *args, **kwargs):
         """PATCH /api/request-items/{id}/ - частичное обновление (количество)"""
@@ -374,7 +398,10 @@ class RequestItemViewSet(viewsets.ModelViewSet):
         
         quantity = request.data.get('quantity')
         if quantity is not None:
-            item.quantity = quantity
+            try:
+                item.quantity = parse_quantity(quantity)
+            except ValueError as error:
+                return Response({'error': str(error)}, status=status.HTTP_400_BAD_REQUEST)
             item.save()
             item.request.calculate_total()
         

@@ -96,19 +96,29 @@ class RequestItemSerializer(serializers.ModelSerializer):
     substance_name = serializers.CharField(source='substance.name', read_only=True)
     substance_cas = serializers.CharField(source='substance.cas', read_only=True)
     substance_price = serializers.DecimalField(source='substance.price', read_only=True, max_digits=10, decimal_places=2)
+    substance_price_display = serializers.SerializerMethodField()
     substance_image_url = serializers.SerializerMethodField()
+    item_total = serializers.DecimalField(read_only=True, max_digits=12, decimal_places=2)
+    item_total_display = serializers.SerializerMethodField()
     
     class Meta:
         model = RequestItem
         fields = [
             'id', 'request', 'substance', 'substance_name', 'substance_cas',
-            'substance_price', 'substance_image_url', 'quantity', 'unit',
-            'mm_value', 'order_number', 'is_main', 'item_comment', 'calculated_value'
+            'substance_price', 'substance_price_display', 'substance_image_url',
+            'quantity', 'unit', 'mm_value', 'order_number', 'is_main',
+            'item_comment', 'calculated_value', 'item_total', 'item_total_display'
         ]
         read_only_fields = ['calculated_value']
     
+    def get_substance_price_display(self, obj):
+        return obj.substance.price_display
+
     def get_substance_image_url(self, obj):
         return obj.substance.image_url
+
+    def get_item_total_display(self, obj):
+        return f"{obj.item_total:.2f} ₽"
 
 
 class RequestSerializer(serializers.ModelSerializer):

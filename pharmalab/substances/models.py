@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.conf import settings
+from decimal import Decimal
 
 
 class User(AbstractUser):
@@ -138,8 +139,8 @@ class Request(models.Model):
     
     def calculate_total(self):
         total = sum(
-            float(item.substance.price) * float(item.quantity)
-            for item in self.items.filter(is_active=True)
+            (item.item_total for item in self.items.filter(is_active=True)),
+            Decimal('0.00')
         )
         self.total_amount = total
         self.save(update_fields=['total_amount'])
@@ -215,8 +216,13 @@ class RequestItem(models.Model):
     
     @property
     def item_total(self):
-        return float(self.substance.price) * float(self.quantity)
+        quantity = Decimal(str(self.quantity or 0))
+        return self.substance.price * quantity
     
     def calculate_value(self):
-        self.calculated_value = float(self.substance.price) * float(self.quantity)
+        self.calculated_value = self.item_total
         return self.calculated_value
+
+    def save(self, *args, **kwargs):
+        self.calculate_value()
+        super().save(*args, **kwargs)
