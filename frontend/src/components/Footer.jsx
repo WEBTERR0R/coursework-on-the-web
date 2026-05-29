@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { IS_GUEST_APP } from '../config/runtime'
 
 function Footer() {
   const user = useSelector((state) => state.auth.user)
@@ -14,12 +15,12 @@ function Footer() {
         <div className="footer-section">
           <h4>Навигация</h4>
           <Link to="/">Каталог</Link>
-          <Link to="/cart">Корзина</Link>
-          {user && <Link to="/requests">Мои заявки</Link>}
-          {user && <Link to="/profile">Личный кабинет</Link>}
-          {user?.is_moderator && <Link to="/moderator/requests">Модерация</Link>}
-          {!user && <Link to="/login">Вход</Link>}
-          {!user && <Link to="/register">Регистрация</Link>}
+          {!IS_GUEST_APP && <Link to="/cart">Корзина</Link>}
+          {!IS_GUEST_APP && user && <Link to="/requests">Мои заявки</Link>}
+          {!IS_GUEST_APP && user && <Link to="/profile">Личный кабинет</Link>}
+          {!IS_GUEST_APP && user?.is_moderator && <Link to="/moderator/requests">Модерация</Link>}
+          {!IS_GUEST_APP && !user && <Link to="/login">Вход</Link>}
+          {!IS_GUEST_APP && !user && <Link to="/register">Регистрация</Link>}
         </div>
         <div className="footer-section">
           <h4>Контакты</h4>

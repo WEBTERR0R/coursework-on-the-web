@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-label="Ибупрофен">
+  <rect width="640" height="420" fill="#f7f8fb"/>
+  <g fill="none" stroke="#1d2430" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M166 188 260 134 354 188v108l-94 54-94-54Z"/>
+    <path d="M354 188 452 132l84 48"/>
+    <path d="M166 188v108"/>
+    <path d="M260 350 354 296"/>
+    <path d="M260 134 224 72"/>
+    <path d="M452 132 500 72"/>
+    <path d="M500 72h74"/>
+  </g>
+  <g fill="#1d2430" font-family="Arial, sans-serif" font-size="40" font-weight="700">
+    <text x="96" y="86">COOH</text>
+    <text x="520" y="70">CH₃</text>
+  </g>
+</svg>

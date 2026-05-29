@@ -27,6 +27,7 @@ dist/
 build/
 .next/
 out/
+frontend/src-tauri/target/
 
 # Медиа и статика
 media/

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import AppNavbar from './components/Navbar'
 import Footer from './components/Footer'
+import { ROUTER_BASENAME } from './config/runtime'
 import CatalogPage from './pages/CatalogPage'
 import DetailPage from './pages/DetailPage'
 import CartPage from './pages/CartPage'
@@ -13,7 +14,7 @@ import ModeratorRequestsPage from './pages/ModeratorRequestsPage'
 
 function App() {
   return (
-    <Router>
+    <Router basename={ROUTER_BASENAME}>
       <AppNavbar />
       <Routes>
         <Route path="/" element={<CatalogPage />} />

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-label="Парацетамол">
+  <rect width="640" height="420" fill="#f5faf7"/>
+  <g fill="none" stroke="#173226" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M190 150 290 92 390 150v116l-100 58-100-58Z"/>
+    <path d="M190 150v116"/>
+    <path d="M290 92v-58"/>
+    <path d="M390 150 500 88"/>
+    <path d="M500 88 568 126"/>
+    <path d="M500 88v-54"/>
+    <path d="M290 324 390 266"/>
+  </g>
+  <g fill="#173226" font-family="Arial, sans-serif" font-size="42" font-weight="700">
+    <text x="250" y="34">OH</text>
+    <text x="500" y="154">NH</text>
+    <text x="478" y="34">O</text>
+  </g>
+</svg>

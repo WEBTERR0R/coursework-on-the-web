@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import Breadcrumbs from '../components/Breadcrumbs'
+import { IS_GUEST_APP } from '../config/runtime'
 import { addItemToCart } from '../store/cartSlice'
 import { buildSimilarSubstances, fetchSubstance, fetchSubstances } from '../store/substancesSlice'
 
@@ -139,7 +140,7 @@ function DetailPage() {
             </section>
           </div>
 
-          <div className="detail-purchase-panel">
+          {!IS_GUEST_APP && <div className="detail-purchase-panel">
             <div>
               <span className="purchase-label">Стоимость</span>
               <strong className="purchase-price">{substance.price_display || `${substance.price} ₽`}</strong>
@@ -151,7 +152,7 @@ function DetailPage() {
             >
               {addingId === substance.id ? 'Добавление...' : 'Купить'}
             </button>
-          </div>
+          </div>}
         </div>
       </article>
       
@@ -190,7 +191,7 @@ function DetailPage() {
                     )}
                   </div>
                 </Link>
-                <div className="card-footer">
+                {!IS_GUEST_APP && <div className="card-footer">
                   <button
                     className="add-to-request-btn"
                     onClick={() => handleAddToCart(service.id)}
@@ -198,7 +199,7 @@ function DetailPage() {
                   >
                     {addingId === service.id ? 'Добавление...' : 'Купить'}
                   </button>
-                </div>
+                </div>}
               </article>
             ))}
           </div>

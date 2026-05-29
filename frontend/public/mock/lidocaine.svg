@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-label="Лидокаин гидрохлорид">
+  <rect width="640" height="420" fill="#f8f6f2"/>
+  <g fill="none" stroke="#202735" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M132 202 220 150 308 202v104l-88 52-88-52Z"/>
+    <path d="M308 202 394 150"/>
+    <path d="M394 150 472 196"/>
+    <path d="M472 196 550 150"/>
+    <path d="M220 150v-64"/>
+    <path d="M132 202v104"/>
+    <path d="M220 358 308 306"/>
+  </g>
+  <g fill="#202735" font-family="Arial, sans-serif" font-size="38" font-weight="700">
+    <text x="184" y="82">CH₃</text>
+    <text x="372" y="146">NH</text>
+    <text x="520" y="148">N</text>
+    <text x="406" y="244">O</text>
+  </g>
+</svg>

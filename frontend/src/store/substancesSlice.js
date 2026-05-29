@@ -1,19 +1,48 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { substancesApi } from '../api/generated/pharmalabApi'
+import { API_BASE_URL, substancesApi } from '../api/generated/pharmalabApi'
 
 function getErrorMessage(error, fallback) {
+  if (!error?.response && error?.message) {
+    return `${fallback}. API недоступен: ${API_BASE_URL}`
+  }
   return error?.response?.data?.error || error?.response?.data?.detail || fallback
+}
+
+const FILTERS_STORAGE_KEY = 'pharmalab.catalogFilters'
+
+const defaultFilters = {
+  search: '',
+  price_from: '',
+  price_to: '',
+}
+
+function loadSavedFilters() {
+  if (typeof window === 'undefined') return defaultFilters
+
+  try {
+    const saved = window.localStorage.getItem(FILTERS_STORAGE_KEY)
+    if (!saved) return defaultFilters
+    const parsed = JSON.parse(saved)
+    return {
+      search: parsed.search || '',
+      price_from: parsed.price_from || '',
+      price_to: parsed.price_to || '',
+    }
+  } catch {
+    return defaultFilters
+  }
+}
+
+function saveFilters(filters) {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters))
 }
 
 const initialState = {
   items: [],
   current: null,
   similar: [],
-  filters: {
-    search: '',
-    price_from: '',
-    price_to: '',
-  },
+  filters: loadSavedFilters(),
   status: 'idle',
   currentStatus: 'idle',
   error: null,
@@ -47,9 +76,11 @@ const substancesSlice = createSlice({
   reducers: {
     setCatalogFilters(state, action) {
       state.filters = { ...state.filters, ...action.payload }
+      saveFilters(state.filters)
     },
     resetCatalogFilters(state) {
-      state.filters = initialState.filters
+      state.filters = defaultFilters
+      saveFilters(defaultFilters)
     },
     buildSimilarSubstances(state) {
       if (!state.current) {

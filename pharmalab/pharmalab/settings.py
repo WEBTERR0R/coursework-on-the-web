@@ -15,7 +15,10 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-2026-pharmalab')
 
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+ALLOWED_HOSTS = os.getenv(
+    'ALLOWED_HOSTS',
+    'localhost,127.0.0.1,0.0.0.0,192.168.1.186'
+).split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -33,6 +36,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'substances.middleware.DisableCSRFForAPI',
+    'substances.middleware.ApiCorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -135,7 +139,14 @@ MINIO_USE_SSL = os.getenv('MINIO_USE_SSL', 'False') == 'True'
 DEMO_USER_ID = int(os.getenv('DEMO_USER_ID', '1'))
 
 # CSRF и CORS настройки
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'http://127.0.0.1:3000']
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    'CSRF_TRUSTED_ORIGINS',
+    'http://localhost:3000,http://127.0.0.1:3000,http://192.168.1.186:3000,https://192.168.1.186:3000'
+).split(',')
+API_CORS_ALLOWED_ORIGINS = os.getenv(
+    'API_CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://127.0.0.1:3000,http://192.168.1.186:3000,https://192.168.1.186:3000,http://tauri.localhost,tauri://localhost'
+).split(',')
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_HTTPONLY = False
 CSRF_USE_SESSIONS = False

@@ -4,26 +4,89 @@ import { useDispatch, useSelector } from 'react-redux'
 import SubstanceCard from '../components/SubstanceCard'
 import HeroVideo from '../components/HeroVideo'
 import Breadcrumbs from '../components/Breadcrumbs'
+import { IS_GUEST_APP } from '../config/runtime'
 import { addItemToCart, fetchCart } from '../store/cartSlice'
-import { fetchSubstances, setCatalogFilters } from '../store/substancesSlice'
+import { fetchSubstances, resetCatalogFilters, setCatalogFilters } from '../store/substancesSlice'
+
+function CatalogFilterForm({ initialFilters, onApply, onReset }) {
+  const [searchInput, setSearchInput] = useState(initialFilters.search || '')
+  const [priceFrom, setPriceFrom] = useState(initialFilters.price_from || '')
+  const [priceTo, setPriceTo] = useState(initialFilters.price_to || '')
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    onApply({
+      search: searchInput.trim(),
+      price_from: priceFrom,
+      price_to: priceTo,
+    })
+  }
+
+  const handleReset = () => {
+    setSearchInput('')
+    setPriceFrom('')
+    setPriceTo('')
+    onReset()
+  }
+
+  return (
+    <form onSubmit={handleSearch} className="filter-form">
+      <div className="filter-group filter-group-wide">
+        <label className="filter-label">Поиск по названию или CAS</label>
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Например: парацетамол"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+        />
+      </div>
+      <div className="filter-group">
+        <label className="filter-label">Цена от (₽)</label>
+        <input
+          type="number"
+          className="search-input"
+          placeholder="1000"
+          value={priceFrom}
+          onChange={(e) => setPriceFrom(e.target.value)}
+        />
+      </div>
+      <div className="filter-group">
+        <label className="filter-label">Цена до (₽)</label>
+        <input
+          type="number"
+          className="search-input"
+          placeholder="5000"
+          value={priceTo}
+          onChange={(e) => setPriceTo(e.target.value)}
+        />
+      </div>
+      <div className="filter-buttons">
+        <button type="submit" className="add-to-request-btn filter-submit-btn">
+          Применить
+        </button>
+        <button type="button" onClick={handleReset} className="btn-reset">
+          Сбросить
+        </button>
+      </div>
+    </form>
+  )
+}
 
 function CatalogPage() {
-  const [searchInput, setSearchInput] = useState('')
-  const [priceFrom, setPriceFrom] = useState('')
-  const [priceTo, setPriceTo] = useState('')
   const dispatch = useDispatch()
   const location = useLocation()
   const navigate = useNavigate()
-  const { items: substances, status, error } = useSelector((state) => state.substances)
+  const { items: substances, status, error, filters: savedFilters } = useSelector((state) => state.substances)
   const cart = useSelector((state) => state.cart)
   const cartCount = cart.items_count || 0
   const cartQuantity = cart.total_quantity || 0
   const cartTotal = cart.total_amount || 0
   
   const searchParams = new URLSearchParams(location.search)
-  const searchQuery = searchParams.get('search') || ''
-  const priceFromParam = searchParams.get('price_from') || ''
-  const priceToParam = searchParams.get('price_to') || ''
+  const searchQuery = searchParams.has('search') ? searchParams.get('search') : savedFilters.search
+  const priceFromParam = searchParams.has('price_from') ? searchParams.get('price_from') : savedFilters.price_from
+  const priceToParam = searchParams.has('price_to') ? searchParams.get('price_to') : savedFilters.price_to
 
   const fetchAll = useCallback(async () => {
     const filters = {
@@ -31,24 +94,38 @@ function CatalogPage() {
       price_from: priceFromParam,
       price_to: priceToParam,
     }
-    dispatch(setCatalogFilters(filters))
+    if (
+      savedFilters.search !== filters.search
+      || savedFilters.price_from !== filters.price_from
+      || savedFilters.price_to !== filters.price_to
+    ) {
+      dispatch(setCatalogFilters(filters))
+    }
     await Promise.all([
       dispatch(fetchSubstances(filters)),
-      dispatch(fetchCart()),
+      IS_GUEST_APP ? Promise.resolve() : dispatch(fetchCart()),
     ])
-  }, [dispatch, searchQuery, priceFromParam, priceToParam])
+  }, [
+    dispatch,
+    searchQuery,
+    priceFromParam,
+    priceToParam,
+    savedFilters.search,
+    savedFilters.price_from,
+    savedFilters.price_to,
+  ])
 
   useEffect(() => {
     fetchAll()
   }, [fetchAll])
 
-  const handleSearch = (e) => {
-    e.preventDefault()
+  const handleSearch = (filters) => {
     const params = new URLSearchParams()
-    if (searchInput.trim()) params.append('search', searchInput.trim())
-    if (priceFrom) params.append('price_from', priceFrom)
-    if (priceTo) params.append('price_to', priceTo)
-    navigate(`/?${params.toString()}`)
+    if (filters.search) params.append('search', filters.search)
+    if (filters.price_from) params.append('price_from', filters.price_from)
+    if (filters.price_to) params.append('price_to', filters.price_to)
+    dispatch(setCatalogFilters(filters))
+    navigate(params.toString() ? `/?${params.toString()}` : '/')
   }
 
   const handleAddToCart = async (substanceId) => {
@@ -67,9 +144,7 @@ function CatalogPage() {
   }
 
   const handleReset = () => {
-    setSearchInput('')
-    setPriceFrom('')
-    setPriceTo('')
+    dispatch(resetCatalogFilters())
     navigate('/')
   }
 
@@ -83,49 +158,16 @@ function CatalogPage() {
           <div style={{ flex: 1 }}>
             <h1 className="page-title">Каталог действующих веществ</h1>
             
-            <form onSubmit={handleSearch} style={{ marginBottom: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-              <div style={{ flex: 2, minWidth: '200px' }}>
-                <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem', color: '#64748b' }}>Поиск по названию или CAS</label>
-                <input 
-                  type="text" 
-                  className="search-input" 
-                  placeholder="Например: парацетамол"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  style={{ width: '100%' }}
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: '120px' }}>
-                <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem', color: '#64748b' }}>Цена от (₽)</label>
-                <input 
-                  type="number" 
-                  className="search-input" 
-                  placeholder="1000"
-                  value={priceFrom}
-                  onChange={(e) => setPriceFrom(e.target.value)}
-                  style={{ width: '100%' }}
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: '120px' }}>
-                <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem', color: '#64748b' }}>Цена до (₽)</label>
-                <input 
-                  type="number" 
-                  className="search-input" 
-                  placeholder="5000"
-                  value={priceTo}
-                  onChange={(e) => setPriceTo(e.target.value)}
-                  style={{ width: '100%' }}
-                />
-              </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button type="submit" className="add-to-request-btn" style={{ width: 'auto', padding: '0.625rem 1.5rem' }}>
-                  Применить
-                </button>
-                <button type="button" onClick={handleReset} style={{ background: '#e2e8f0', color: '#1e293b', border: 'none', borderRadius: '10px', padding: '0.625rem 1.5rem', cursor: 'pointer' }}>
-                  Сбросить
-                </button>
-              </div>
-            </form>
+            <CatalogFilterForm
+              key={`${searchQuery}-${priceFromParam}-${priceToParam}`}
+              initialFilters={{
+                search: searchQuery,
+                price_from: priceFromParam,
+                price_to: priceToParam,
+              }}
+              onApply={handleSearch}
+              onReset={handleReset}
+            />
             
             {status === 'loading' && <div className="loader-block">Загрузка каталога...</div>}
             {error && <div className="text-center" style={{ color: 'red' }}>{error}</div>}
@@ -137,6 +179,7 @@ function CatalogPage() {
                     key={substance.id} 
                     substance={substance} 
                     onAddToCart={() => handleAddToCart(substance.id)}
+                    canBuy={!IS_GUEST_APP}
                   />
                 ))}
               </div>
@@ -147,7 +190,7 @@ function CatalogPage() {
             )}
           </div>
           
-          <aside className="request-sidebar-card">
+          {!IS_GUEST_APP && <aside className="request-sidebar-card">
             <div className="request-header">
               <span className="request-title">Заявка</span>
               <span className="request-badge">{cartCount}</span>
@@ -180,7 +223,7 @@ function CatalogPage() {
                 </button>
               </>
             )}
-          </aside>
+          </aside>}
         </div>
       </main>
     </>

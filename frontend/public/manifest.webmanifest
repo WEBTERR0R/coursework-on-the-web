@@ -1,0 +1,19 @@
+{
+  "name": "PharmaLab",
+  "short_name": "PharmaLab",
+  "description": "Каталог фармацевтических субстанций и заявок",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f8fafc",
+  "theme_color": "#0b3b5f",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

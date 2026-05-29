@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+import { IS_GUEST_APP } from '../config/runtime'
 import { bootstrapAuth, logoutUser } from '../store/authSlice'
 import { CART_UPDATED_EVENT, fetchCart } from '../store/cartSlice'
 
@@ -33,12 +34,16 @@ function AppNavbar() {
   const cartCount = getCartBadgeCount(cart)
 
   useEffect(() => {
+    if (IS_GUEST_APP) return
+
     dispatch(bootstrapAuth()).then(() => {
       dispatch(fetchCart())
     })
   }, [dispatch])
 
   useEffect(() => {
+    if (IS_GUEST_APP) return
+
     const handleCartUpdated = () => {
       dispatch(fetchCart())
     }
@@ -62,16 +67,16 @@ function AppNavbar() {
         <Link to="/" className="logo">PharmaLab</Link>
         <nav className="main-nav">
           <Link to="/" className="nav-link">Каталог</Link>
-          {user && <Link to="/requests" className="nav-link">Мои заявки</Link>}
-          {user?.is_moderator && <Link to="/moderator/requests" className="nav-link">Модерация</Link>}
-          {user && <Link to="/profile" className="nav-link">Личный кабинет</Link>}
+          {!IS_GUEST_APP && user && <Link to="/requests" className="nav-link">Мои заявки</Link>}
+          {!IS_GUEST_APP && user?.is_moderator && <Link to="/moderator/requests" className="nav-link">Модерация</Link>}
+          {!IS_GUEST_APP && user && <Link to="/profile" className="nav-link">Личный кабинет</Link>}
         </nav>
       </div>
       <div className="header-right">
-        <Link to="/cart" className="cart-link" aria-label={`Корзина: ${formatCartCount(cartCount)}`}>
+        {!IS_GUEST_APP && <Link to="/cart" className="cart-link" aria-label={`Корзина: ${formatCartCount(cartCount)}`}>
           <CartIcon />
           {cartCount > 0 && <span className="cart-count">{formatCartCount(cartCount)}</span>}
-        </Link>
+        </Link>}
         {user ? (
           <div className="user-menu">
             <Link to="/profile" className="user-name">{user.username}</Link>

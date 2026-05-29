@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 const DEFAULT_IMAGE = 'https://via.placeholder.com/300x200?text=No+Image'
 
-function SubstanceCard({ substance, onAddToCart }) {
+function SubstanceCard({ substance, onAddToCart, canBuy = true }) {
   const [adding, setAdding] = useState(false)
 
   const handleAddToCart = async (e) => {
@@ -38,7 +38,7 @@ function SubstanceCard({ substance, onAddToCart }) {
           <div className="card-cas">CAS: {substance.cas}</div>
         </div>
       </Link>
-      <div className="card-footer">
+      {canBuy && <div className="card-footer">
         <button 
           className="add-to-request-btn" 
           onClick={handleAddToCart}
@@ -46,7 +46,7 @@ function SubstanceCard({ substance, onAddToCart }) {
         >
           {adding ? 'Добавление...' : 'Купить'}
         </button>
-      </div>
+      </div>}
     </article>
   )
 }
