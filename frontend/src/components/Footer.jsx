@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 function Footer() {
+  const user = useSelector((state) => state.auth.user)
+
   return (
     <footer className="footer">
       <div className="footer-content">
@@ -11,7 +14,12 @@ function Footer() {
         <div className="footer-section">
           <h4>Навигация</h4>
           <Link to="/">Каталог</Link>
-          <a href="/admin/">Админ-панель</a>
+          <Link to="/cart">Корзина</Link>
+          {user && <Link to="/requests">Мои заявки</Link>}
+          {user && <Link to="/profile">Личный кабинет</Link>}
+          {user?.is_moderator && <Link to="/moderator/requests">Модерация</Link>}
+          {!user && <Link to="/login">Вход</Link>}
+          {!user && <Link to="/register">Регистрация</Link>}
         </div>
         <div className="footer-section">
           <h4>Контакты</h4>

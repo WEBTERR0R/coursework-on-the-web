@@ -88,17 +88,26 @@ function DetailPage() {
       <Breadcrumbs />
       
       <article className="detail-container">
-        <div className="detail-image-wrapper">
-          <img 
-            src={imageUrl} 
-            alt={substance.name}
-            className="detail-image"
-            onError={(e) => { e.target.src = DEFAULT_IMAGE }}
-          />
+        <div className="detail-media-panel">
+          <div className="detail-image-wrapper">
+            <img 
+              src={imageUrl} 
+              alt={substance.name}
+              className="detail-image"
+              onError={(e) => { e.target.src = DEFAULT_IMAGE }}
+            />
+          </div>
+          <div className="detail-media-caption">
+            <span>Субстанция</span>
+            <strong>{substance.pharmacopoeia || 'USP, EP'}</strong>
+          </div>
         </div>
         
         <div className="detail-content">
-          <h1 className="detail-title">{substance.name}</h1>
+          <div className="detail-heading">
+            <span className="detail-eyebrow">Фармацевтическая субстанция</span>
+            <h1 className="detail-title">{substance.name}</h1>
+          </div>
           
           <div className="detail-meta">
             <div className="meta-item">
@@ -113,26 +122,36 @@ function DetailPage() {
               <span className="meta-label">Мол. масса</span>
               <span className="meta-value">{substance.molecular_weight} г/моль</span>
             </div>
+            <div className="meta-item">
+              <span className="meta-label">Срок годности</span>
+              <span className="meta-value">{substance.shelf_life || 24} месяцев</span>
+            </div>
           </div>
           
           <div className="detail-description">
-            <h3>Описание</h3>
-            <p>{substance.description || 'Описание отсутствует'}</p>
-            
-            <h3>Применение</h3>
-            <p>Применяется в производстве лекарственных препаратов. Соответствует требованиям фармакопеи и стандартам надлежащей производственной практики.</p>
-            
-            <h3>Срок годности</h3>
-            <p>{substance.shelf_life || 24} месяцев</p>
+            <section className="detail-info-section">
+              <h3>Описание</h3>
+              <p>{substance.description || 'Описание отсутствует'}</p>
+            </section>
+            <section className="detail-info-section">
+              <h3>Применение</h3>
+              <p>Применяется в производстве лекарственных препаратов. Соответствует требованиям фармакопеи и стандартам надлежащей производственной практики.</p>
+            </section>
           </div>
-          
-          <button
-            className="add-to-request-btn"
-            onClick={() => handleAddToCart(substance.id)}
-            disabled={addingId === substance.id}
-          >
-            {addingId === substance.id ? 'Добавление...' : 'Купить'}
-          </button>
+
+          <div className="detail-purchase-panel">
+            <div>
+              <span className="purchase-label">Стоимость</span>
+              <strong className="purchase-price">{substance.price_display || `${substance.price} ₽`}</strong>
+            </div>
+            <button
+              className="add-to-request-btn detail-buy-btn"
+              onClick={() => handleAddToCart(substance.id)}
+              disabled={addingId === substance.id}
+            >
+              {addingId === substance.id ? 'Добавление...' : 'Купить'}
+            </button>
+          </div>
         </div>
       </article>
       

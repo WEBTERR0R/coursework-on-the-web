@@ -65,9 +65,6 @@ function AppNavbar() {
           {user && <Link to="/requests" className="nav-link">Мои заявки</Link>}
           {user?.is_moderator && <Link to="/moderator/requests" className="nav-link">Модерация</Link>}
           {user && <Link to="/profile" className="nav-link">Личный кабинет</Link>}
-          <a href="http://127.0.0.1:8000/admin/" className="nav-link" target="_blank" rel="noopener noreferrer">
-            Админ панель
-          </a>
         </nav>
       </div>
       <div className="header-right">

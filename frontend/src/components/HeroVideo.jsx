@@ -7,10 +7,10 @@ function HeroVideo() {
   const videoRef = useRef(null)
   
   const phrases = [
-    'СОЗДАЕМ ЛЕКАРСТВЕННЫЕ ПРЕПАРАТЫ ДЛЯ ЖИЗНИ',
-    'ПОЛНЫЙ ЦИКЛ ПРОИЗВОДСТВА ЛЕКАРСТВ',
-    'КАЧЕСТВО, ПРОВЕРЕННОЕ ВРЕМЕНЕМ',
-    'ИННОВАЦИИ В ФАРМАЦЕВТИКЕ'
+    'Создаем лекарственные препараты для жизни',
+    'Полный цикл производства лекарств',
+    'Качество, проверенное временем',
+    'Инновации в фармацевтике'
   ]
 
   useEffect(() => {
@@ -41,16 +41,21 @@ function HeroVideo() {
       </video>
       <div className="hero-overlay-dark"></div>
       <div className="hero-content-center">
-        <div className="hero-phrases-block">
+        <div className="hero-kicker">PharmaLab</div>
+        <div className="hero-phrases-block" aria-live="polite">
           {phrases.map((phrase, index) => (
-            <div 
+            <h1
               key={index}
               className={`hero-phrase ${index === currentPhraseIndex ? 'active' : ''}`}
             >
               {phrase}
-            </div>
+            </h1>
           ))}
         </div>
+        <p className="hero-subtitle">
+          Фармацевтические субстанции, лабораторная точность и прозрачная работа с заявками
+        </p>
+        <div className="hero-accent-line" aria-hidden="true"></div>
       </div>
     </div>
   )
