@@ -11,7 +11,7 @@
     "build:tauri": "vite build --mode tauri",
     "lint": "eslint .",
     "preview": "vite preview",
-    "preview:pages": "vite preview --mode pages --base /pharmaproject/ --host 127.0.0.1",
+    "preview:pages": "vite preview --mode pages --base /coursework-on-the-web/ --host 127.0.0.1",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"
   },
