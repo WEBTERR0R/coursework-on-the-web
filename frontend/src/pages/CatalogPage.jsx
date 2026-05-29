@@ -1,53 +1,42 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { getSubstances, getCart, addToRequest } from '../services/api'
+import { useDispatch, useSelector } from 'react-redux'
 import SubstanceCard from '../components/SubstanceCard'
 import HeroVideo from '../components/HeroVideo'
 import Breadcrumbs from '../components/Breadcrumbs'
+import { addItemToCart, fetchCart } from '../store/cartSlice'
+import { fetchSubstances, setCatalogFilters } from '../store/substancesSlice'
 
 function CatalogPage() {
-  const [substances, setSubstances] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [cartCount, setCartCount] = useState(0)
-  const [cartTotal, setCartTotal] = useState(0)
-  const [error, setError] = useState(null)
   const [searchInput, setSearchInput] = useState('')
   const [priceFrom, setPriceFrom] = useState('')
   const [priceTo, setPriceTo] = useState('')
+  const dispatch = useDispatch()
   const location = useLocation()
   const navigate = useNavigate()
+  const { items: substances, status, error } = useSelector((state) => state.substances)
+  const cart = useSelector((state) => state.cart)
+  const cartCount = cart.items_count || 0
+  const cartQuantity = cart.total_quantity || 0
+  const cartTotal = cart.total_amount || 0
   
   const searchParams = new URLSearchParams(location.search)
   const searchQuery = searchParams.get('search') || ''
   const priceFromParam = searchParams.get('price_from') || ''
   const priceToParam = searchParams.get('price_to') || ''
 
-  const fetchSubstances = useCallback(async () => {
-    try {
-      const data = await getSubstances(searchQuery, priceFromParam, priceToParam)
-      setSubstances(data || [])
-      setError(null)
-    } catch (err) {
-      setError('Ошибка загрузки данных')
-      console.error(err)
-    }
-  }, [searchQuery, priceFromParam, priceToParam])
-
-  const fetchCart = useCallback(async () => {
-    try {
-      const cartData = await getCart()
-      setCartCount(cartData?.items_count || 0)
-      setCartTotal(cartData?.total_amount || 0)
-    } catch (err) {
-      console.error('Ошибка загрузки корзины', err)
-    }
-  }, [])
-
   const fetchAll = useCallback(async () => {
-    setLoading(true)
-    await Promise.all([fetchSubstances(), fetchCart()])
-    setLoading(false)
-  }, [fetchSubstances, fetchCart])
+    const filters = {
+      search: searchQuery,
+      price_from: priceFromParam,
+      price_to: priceToParam,
+    }
+    dispatch(setCatalogFilters(filters))
+    await Promise.all([
+      dispatch(fetchSubstances(filters)),
+      dispatch(fetchCart()),
+    ])
+  }, [dispatch, searchQuery, priceFromParam, priceToParam])
 
   useEffect(() => {
     fetchAll()
@@ -63,14 +52,17 @@ function CatalogPage() {
   }
 
   const handleAddToCart = async (substanceId) => {
-    try {
-      await addToRequest(substanceId)
-      await fetchCart()
-    } catch (error) {
-      console.error('Ошибка добавления:', error)
-      if (error.message === 'Необходима авторизация') {
-        navigate('/login')
-      }
+    const result = await dispatch(addItemToCart({ substanceId }))
+    if (addItemToCart.rejected.match(result) && result.payload === 'Необходима авторизация') {
+      navigate('/login', {
+        state: {
+          from: {
+            pathname: location.pathname,
+            search: location.search
+          },
+          authMessage: 'Войдите или зарегистрируйтесь, чтобы купить товар'
+        }
+      })
     }
   }
 
@@ -135,10 +127,10 @@ function CatalogPage() {
               </div>
             </form>
             
-            {loading && <div className="text-center">Загрузка...</div>}
+            {status === 'loading' && <div className="loader-block">Загрузка каталога...</div>}
             {error && <div className="text-center" style={{ color: 'red' }}>{error}</div>}
             
-            {!loading && !error && (
+            {status !== 'loading' && !error && (
               <div className="services-grid">
                 {substances.map(substance => (
                   <SubstanceCard 
@@ -150,7 +142,7 @@ function CatalogPage() {
               </div>
             )}
             
-            {!loading && !error && substances.length === 0 && (
+            {status !== 'loading' && !error && substances.length === 0 && (
               <div className="text-center">Ничего не найдено</div>
             )}
           </div>
@@ -159,9 +151,6 @@ function CatalogPage() {
             <div className="request-header">
               <span className="request-title">Заявка</span>
               <span className="request-badge">{cartCount}</span>
-            </div>
-            <div className="request-id">
-              ID: {cartCount > 0 ? '#35' : 'не создана'}
             </div>
             
             {cartCount === 0 ? (
@@ -176,11 +165,16 @@ function CatalogPage() {
                     <span>Позиций:</span>
                     <strong>{cartCount}</strong>
                   </div>
+                  <div className="stat-row">
+                    <span>Количество:</span>
+                    <strong>{cartQuantity}</strong>
+                  </div>
                 </div>
                 <div className="request-calculation">{Number(cartTotal).toFixed(2)} ₽</div>
                 <button 
-                  onClick={() => navigate('/cart')} 
+                  onClick={() => navigate(cart.request_id ? `/requests/${cart.request_id}` : '/cart')} 
                   className="request-link"
+                  disabled={!cart.request_id}
                 >
                   Перейти в заявку
                 </button>

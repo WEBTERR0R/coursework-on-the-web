@@ -16,6 +16,7 @@ import uuid
 from .models import User, Substance, Request, RequestItem
 from .serializers import (
     UserSerializer, RegisterSerializer, LoginSerializer,
+    UserUpdateSerializer, ChangePasswordSerializer,
     SubstanceSerializer, SubstanceCreateSerializer,
     RequestSerializer, RequestCreateSerializer, RequestUpdateSerializer,
     RequestItemSerializer, RequestItemCreateSerializer, RequestItemUpdateSerializer
@@ -55,6 +56,10 @@ class AuthViewSet(viewsets.GenericViewSet):
             return LoginSerializer
         if self.action == 'me':
             return UserSerializer
+        if self.action == 'profile':
+            return UserUpdateSerializer
+        if self.action == 'change_password':
+            return ChangePasswordSerializer
         return None
     
     def get_serializer(self, *args, **kwargs):
@@ -91,6 +96,27 @@ class AuthViewSet(viewsets.GenericViewSet):
         if request.user.is_authenticated:
             return Response(UserSerializer(request.user).data)
         return Response({'error': 'Не авторизован'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    @action(detail=False, methods=['patch'], permission_classes=[IsAuthenticated])
+    def profile(self, request):
+        serializer = UserUpdateSerializer(
+            request.user,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(UserSerializer(user).data)
+
+    @action(detail=False, methods=['post'], url_path='change-password', permission_classes=[IsAuthenticated])
+    def change_password(self, request):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        request.user.set_password(serializer.validated_data['new_password'])
+        request.user.save(update_fields=['password'])
+        login(request, request.user)
+        return Response({'message': 'Пароль успешно изменен'})
 
 
 # ========== УСЛУГИ ==========
@@ -212,9 +238,9 @@ class RequestViewSet(viewsets.ModelViewSet):
         formed_from = self.request.query_params.get('formed_from')
         formed_to = self.request.query_params.get('formed_to')
         if formed_from:
-            queryset = queryset.filter(formed_at__gte=formed_from)
+            queryset = queryset.filter(formed_at__date__gte=formed_from)
         if formed_to:
-            queryset = queryset.filter(formed_at__lte=formed_to)
+            queryset = queryset.filter(formed_at__date__lte=formed_to)
         
         status_filter = self.request.query_params.get('status')
         if status_filter:
@@ -245,6 +271,21 @@ class RequestViewSet(viewsets.ModelViewSet):
             comments=request.data.get('comments', '')
         )
         return Response(RequestSerializer(request_obj).data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, *args, **kwargs):
+        request_obj = self.get_object()
+
+        if not request.user.is_moderator:
+            return Response({'error': 'Только модератор может удалить заявку'}, status=status.HTTP_403_FORBIDDEN)
+        if request_obj.status not in ['completed', 'rejected']:
+            return Response(
+                {'error': 'Удалить можно только завершённую или отклонённую заявку'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        request_obj.status = 'deleted'
+        request_obj.save(update_fields=['status'])
+        return Response({'message': 'Заявка удалена', 'request_id': request_obj.id}, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['put'])
     def submit(self, request, pk=None):

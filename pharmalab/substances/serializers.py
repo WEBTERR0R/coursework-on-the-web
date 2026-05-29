@@ -14,6 +14,43 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'is_moderator']
 
 
+class UserUpdateSerializer(serializers.ModelSerializer):
+    """Сериализатор редактирования профиля"""
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+
+    def validate_username(self, value):
+        user = self.context['request'].user
+        if User.objects.exclude(id=user.id).filter(username=value).exists():
+            raise serializers.ValidationError("Пользователь с таким именем уже существует")
+        return value
+
+    def validate_email(self, value):
+        user = self.context['request'].user
+        if User.objects.exclude(id=user.id).filter(email=value).exists():
+            raise serializers.ValidationError("Пользователь с таким email уже существует")
+        return value
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """Сериализатор смены пароля"""
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, min_length=6)
+    new_password_confirm = serializers.CharField(write_only=True, min_length=6)
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Текущий пароль указан неверно")
+        return value
+
+    def validate(self, data):
+        if data['new_password'] != data['new_password_confirm']:
+            raise serializers.ValidationError("Новые пароли не совпадают")
+        return data
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     """Сериализатор регистрации"""
     password = serializers.CharField(write_only=True, min_length=6)

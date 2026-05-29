@@ -1,43 +1,32 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchCart } from '../store/cartSlice'
+import { clearAuthMessage, loginUser } from '../store/authSlice'
 
 function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const dispatch = useDispatch()
+  const { error, status } = useSelector((state) => state.auth)
   const navigate = useNavigate()
   const location = useLocation()
+  const loading = status === 'loading'
   
-  const from = location.state?.from?.pathname || '/'
+  const fromState = location.state?.from
+  const from = fromState
+    ? `${fromState.pathname || '/'}${fromState.search || ''}`
+    : '/'
+  const authMessage = location.state?.authMessage || ''
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError('')
-    setLoading(true)
+    dispatch(clearAuthMessage())
     
-    try {
-      const response = await fetch('/api/auth/login/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-        credentials: 'include',  // Важно для установки сессии
-      })
-      
-      const data = await response.json()
-      
-      if (response.ok) {
-        localStorage.setItem('user', JSON.stringify(data.user))
-        localStorage.setItem('isAuthenticated', 'true')
-        navigate(from, { replace: true })
-        window.location.reload() // Перезагружаем для обновления состояния
-      } else {
-        setError(data.error || 'Неверное имя пользователя или пароль')
-      }
-    } catch (err) {
-      setError('Ошибка соединения с сервером')
-    } finally {
-      setLoading(false)
+    const result = await dispatch(loginUser({ username, password }))
+    if (loginUser.fulfilled.match(result)) {
+      await dispatch(fetchCart())
+      navigate(from, { replace: true })
     }
   }
 
@@ -46,6 +35,12 @@ function LoginPage() {
       <div className="auth-container" style={{ maxWidth: '400px', margin: '50px auto' }}>
         <div className="auth-card" style={{ background: 'white', borderRadius: '16px', padding: '2rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
           <h1 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Вход в аккаунт</h1>
+          
+          {authMessage && (
+            <div style={{ background: '#e0f2fe', color: '#0369a1', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem' }}>
+              {authMessage}
+            </div>
+          )}
           
           {error && (
             <div style={{ background: '#fee2e2', color: '#dc2626', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem' }}>
@@ -90,7 +85,7 @@ function LoginPage() {
           
           <div style={{ textAlign: 'center' }}>
             <span style={{ color: '#64748b' }}>Нет аккаунта? </span>
-            <Link to="/register" style={{ color: '#0b3b5f', textDecoration: 'none' }}>Зарегистрироваться</Link>
+            <Link to="/register" state={location.state} style={{ color: '#0b3b5f', textDecoration: 'none' }}>Зарегистрироваться</Link>
           </div>
         </div>
       </div>

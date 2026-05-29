@@ -1,42 +1,59 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { getCart, getCurrentUser } from '../services/api'
+import { useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { bootstrapAuth, logoutUser } from '../store/authSlice'
+import { CART_UPDATED_EVENT, fetchCart } from '../store/cartSlice'
+
+function CartIcon() {
+  return (
+    <svg className="cart-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6.2 6.5h15.1l-1.7 8.1a2 2 0 0 1-2 1.6H8.8a2 2 0 0 1-2-1.6L5.2 3.8H2.8" />
+      <path d="M9.2 20.2h.1" />
+      <path d="M17.2 20.2h.1" />
+    </svg>
+  )
+}
+
+function getCartBadgeCount(cart) {
+  return cart.total_quantity ?? cart.items_count ?? 0
+}
+
+function formatCartCount(count) {
+  const amount = Number(count)
+  if (!Number.isFinite(amount)) return '0'
+  return Number.isInteger(amount) ? String(amount) : amount.toFixed(2)
+}
 
 function AppNavbar() {
-  const [cartCount, setCartCount] = useState(0)
-  const [user, setUser] = useState(null)
-
-  const fetchData = async () => {
-    try {
-      const userData = await getCurrentUser()
-      if (userData && !userData.error) {
-        setUser(userData)
-      } else {
-        setUser(null)
-      }
-      const cart = await getCart()
-      setCartCount(cart.items_count || 0)
-    } catch (error) {
-      console.error('Ошибка загрузки данных', error)
-    }
-  }
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const user = useSelector((state) => state.auth.user)
+  const authInitialized = useSelector((state) => state.auth.initialized)
+  const cart = useSelector((state) => state.cart)
+  const cartCount = getCartBadgeCount(cart)
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    dispatch(bootstrapAuth()).then(() => {
+      dispatch(fetchCart())
+    })
+  }, [dispatch])
 
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout/', {
-        method: 'POST',
-        credentials: 'include',
-      })
-    } catch (error) {
-      console.error('Ошибка выхода:', error)
+  useEffect(() => {
+    const handleCartUpdated = () => {
+      dispatch(fetchCart())
     }
-    setUser(null)
-    setCartCount(0)
-    window.location.href = '/'
+
+    window.addEventListener(CART_UPDATED_EVENT, handleCartUpdated)
+
+    return () => {
+      window.removeEventListener(CART_UPDATED_EVENT, handleCartUpdated)
+    }
+  }, [dispatch])
+
+  const handleLogout = () => {
+    dispatch(logoutUser()).then(() => {
+      navigate('/')
+    })
   }
 
   return (
@@ -45,25 +62,28 @@ function AppNavbar() {
         <Link to="/" className="logo">PharmaLab</Link>
         <nav className="main-nav">
           <Link to="/" className="nav-link">Каталог</Link>
+          {user && <Link to="/requests" className="nav-link">Мои заявки</Link>}
+          {user?.is_moderator && <Link to="/moderator/requests" className="nav-link">Модерация</Link>}
+          {user && <Link to="/profile" className="nav-link">Личный кабинет</Link>}
           <a href="http://127.0.0.1:8000/admin/" className="nav-link" target="_blank" rel="noopener noreferrer">
             Админ панель
           </a>
         </nav>
       </div>
       <div className="header-right">
-        <Link to="/cart" className="cart-link">
-          <span className="cart-icon">🛒</span>
-          {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+        <Link to="/cart" className="cart-link" aria-label={`Корзина: ${formatCartCount(cartCount)}`}>
+          <CartIcon />
+          {cartCount > 0 && <span className="cart-count">{formatCartCount(cartCount)}</span>}
         </Link>
         {user ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ color: '#0b3b5f', fontWeight: '500' }}>{user.username}</span>
-            <button onClick={handleLogout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626' }}>
+          <div className="user-menu">
+            <Link to="/profile" className="user-name">{user.username}</Link>
+            <button onClick={handleLogout} className="logout-btn">
               Выйти
             </button>
           </div>
         ) : (
-          <Link to="/login" className="nav-link">Войти</Link>
+          authInitialized && <Link to="/login" className="nav-link">Войти</Link>
         )}
       </div>
     </header>

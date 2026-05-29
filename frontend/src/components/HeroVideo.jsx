@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const PROMO_VIDEO_URL = 'http://localhost:9000/pharmalab-media/promo.mp4'
 

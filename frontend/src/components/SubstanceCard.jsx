@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const DEFAULT_IMAGE = 'https://via.placeholder.com/300x200?text=No+Image'
@@ -44,7 +44,7 @@ function SubstanceCard({ substance, onAddToCart }) {
           onClick={handleAddToCart}
           disabled={adding}
         >
-          {adding ? 'Добавление...' : 'В заявку'}
+          {adding ? 'Добавление...' : 'Купить'}
         </button>
       </div>
     </article>

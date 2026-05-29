@@ -1,100 +1,61 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { getSubstance, getSubstances } from '../services/api'
+import { useState, useEffect, useCallback } from 'react'
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import Breadcrumbs from '../components/Breadcrumbs'
+import { addItemToCart } from '../store/cartSlice'
+import { buildSimilarSubstances, fetchSubstance, fetchSubstances } from '../store/substancesSlice'
 
 const DEFAULT_IMAGE = 'https://via.placeholder.com/800x450?text=No+Image'
 
 function DetailPage() {
   const { id } = useParams()
-  const [substance, setSubstance] = useState(null)
-  const [similarServices, setSimilarServices] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [similarLoading, setSimilarLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const dispatch = useDispatch()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [addingId, setAddingId] = useState(null)
+  const {
+    current: substance,
+    similar: similarServices,
+    currentStatus,
+    status: listStatus,
+    error,
+  } = useSelector((state) => state.substances)
+  const loading = currentStatus === 'loading'
+  const similarLoading = listStatus === 'loading'
 
-  // Загрузка текущей субстанции
-  useEffect(() => {
-    const fetchSubstance = async () => {
-      setLoading(true)
-      try {
-        const data = await getSubstance(id)
-        setSubstance(data)
-        setError(null)
-      } catch (err) {
-        setError('Ошибка загрузки данных')
-        console.error(err)
-      } finally {
-        setLoading(false)
+  const redirectToLogin = useCallback(() => {
+    navigate('/login', {
+      state: {
+        from: {
+          pathname: location.pathname,
+          search: location.search
+        },
+        authMessage: 'Войдите или зарегистрируйтесь, чтобы купить товар'
       }
-    }
-    
-    fetchSubstance()
-  }, [id])
+    })
+  }, [location.pathname, location.search, navigate])
 
-  // Упрощённая загрузка похожих услуг (по ключевым словам)
-  const loadSimilarServices = useCallback(async (currentSubstance, allSubstances) => {
-    setSimilarLoading(true)
-    try {
-      console.log('Всего субстанций для поиска похожих:', allSubstances.length)
-      
-      // Извлекаем ключевые слова из названия и описания
-      const textForKeywords = `${currentSubstance.name} ${currentSubstance.description || ''}`.toLowerCase()
-      const keywords = textForKeywords.split(/[\s,\.\-\(\)]+/).filter(k => k.length > 3)
-      
-      console.log('Ключевые слова:', keywords)
-      
-      const similar = allSubstances
-        .filter(s => s.id !== currentSubstance.id) // исключаем текущую
-        .map(s => {
-          let score = 0
-          const nameLower = s.name.toLowerCase()
-          const descLower = (s.description || '').toLowerCase()
-          
-          keywords.forEach(keyword => {
-            if (nameLower.includes(keyword)) score += 3
-            if (descLower.includes(keyword)) score += 1
-          })
-          
-          return { ...s, similarity: score }
-        })
-        .filter(s => s.similarity > 0)
-        .sort((a, b) => b.similarity - a.similarity)
-        .slice(0, 4) // показываем до 4 похожих
-      
-      console.log('Найдено похожих:', similar.length)
-      setSimilarServices(similar)
-    } catch (err) {
-      console.error('Ошибка при поиске похожих услуг:', err)
-    } finally {
-      setSimilarLoading(false)
-    }
-  }, [])
+  const handleAddToCart = async (substanceId) => {
+    if (addingId) return
 
-  // Загрузка всех субстанций для поиска похожих
+    setAddingId(substanceId)
+    const result = await dispatch(addItemToCart({ substanceId }))
+    if (addItemToCart.rejected.match(result) && result.payload === 'Необходима авторизация') {
+      redirectToLogin()
+    }
+    setAddingId(null)
+  }
+
+  useEffect(() => {
+    dispatch(fetchSubstance(id))
+    dispatch(fetchSubstances({}))
+  }, [dispatch, id])
+
   useEffect(() => {
     if (substance) {
-      const fetchAllForSimilar = async () => {
-        try {
-          console.log('Загрузка всех субстанций для поиска похожих...')
-          const allSubstances = await getSubstances()
-          console.log('Получено субстанций:', allSubstances?.length || 0)
-          
-          if (allSubstances && allSubstances.length > 1) {
-            await loadSimilarServices(substance, allSubstances)
-          } else {
-            console.log('Недостаточно субстанций для поиска похожих')
-            // Если нет других субстанций, показываем заглушку
-            setSimilarServices([])
-          }
-        } catch (err) {
-          console.error('Ошибка загрузки списка для похожих услуг:', err)
-          setSimilarServices([])
-        }
-      }
-      fetchAllForSimilar()
+      dispatch(buildSimilarSubstances())
     }
-  }, [substance, loadSimilarServices])
+  }, [dispatch, substance, listStatus])
 
   if (loading) {
     return (
@@ -165,7 +126,13 @@ function DetailPage() {
             <p>{substance.shelf_life || 24} месяцев</p>
           </div>
           
-          <button className="add-to-request-btn">Добавить в заявку</button>
+          <button
+            className="add-to-request-btn"
+            onClick={() => handleAddToCart(substance.id)}
+            disabled={addingId === substance.id}
+          >
+            {addingId === substance.id ? 'Добавление...' : 'Купить'}
+          </button>
         </div>
       </article>
       
@@ -205,7 +172,13 @@ function DetailPage() {
                   </div>
                 </Link>
                 <div className="card-footer">
-                  <button className="add-to-request-btn">В заявку</button>
+                  <button
+                    className="add-to-request-btn"
+                    onClick={() => handleAddToCart(service.id)}
+                    disabled={addingId === service.id}
+                  >
+                    {addingId === service.id ? 'Добавление...' : 'Купить'}
+                  </button>
                 </div>
               </article>
             ))}

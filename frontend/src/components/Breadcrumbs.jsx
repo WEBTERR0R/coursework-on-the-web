@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 function Breadcrumbs() {
@@ -8,6 +7,9 @@ function Breadcrumbs() {
   const pathNames = {
     'substance': 'Субстанция',
     'cart': 'Корзина',
+    'requests': 'Заявки',
+    'moderator': 'Модерация',
+    'profile': 'Личный кабинет',
     'login': 'Вход',
     'register': 'Регистрация',
   }
@@ -19,10 +21,10 @@ function Breadcrumbs() {
       {pathnames.map((name, index) => {
         const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`
         const isLast = index === pathnames.length - 1
-        const displayName = pathNames[name] || name
+        const displayName = pathNames[name] || (/^\d+$/.test(name) ? 'Просмотр' : name)
         
         return (
-          <span key={name}>
+          <span key={routeTo}>
             <span style={{ margin: '0 0.5rem' }}>/</span>
             {isLast ? (
               <span style={{ color: '#64748b' }}>{displayName}</span>
