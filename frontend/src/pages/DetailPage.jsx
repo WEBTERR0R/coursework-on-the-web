@@ -99,14 +99,6 @@ function DetailPage() {
               onError={(e) => { e.target.src = DEFAULT_IMAGE }}
             />
           </div>
-          {substance.video_url && (
-            <div className="detail-video-wrapper">
-              <video className="detail-video" controls preload="metadata">
-                <source src={substance.video_url} type="video/mp4" />
-                Ваш браузер не поддерживает видео
-              </video>
-            </div>
-          )}
           <div className="detail-media-caption">
             <span>Субстанция</span>
             <strong>{substance.pharmacopoeia || 'USP, EP'}</strong>
