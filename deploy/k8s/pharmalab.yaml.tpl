@@ -29,6 +29,7 @@ data:
   DB_USER: "postgres"
   DB_HOST: "postgres"
   DB_PORT: "5432"
+  REDIS_URL: "redis://redis:6379/1"
   MINIO_ENDPOINT: "${VM_IP}:30090"
   MINIO_BUCKET: "pharmalab-media"
   MINIO_USE_SSL: "False"
@@ -100,6 +101,100 @@ spec:
   ports:
     - port: 5432
       targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adminer
+  namespace: pharmalab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adminer
+  template:
+    metadata:
+      labels:
+        app: adminer
+    spec:
+      containers:
+        - name: adminer
+          image: adminer:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ADMINER_DEFAULT_SERVER
+              value: postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adminer
+  namespace: pharmalab
+spec:
+  type: NodePort
+  selector:
+    app: adminer
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30082
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-data
+  namespace: pharmalab
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: pharmalab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          command:
+            - redis-server
+            - --appendonly
+            - "yes"
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: pharmalab
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

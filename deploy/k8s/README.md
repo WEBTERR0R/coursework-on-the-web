@@ -29,6 +29,7 @@ kubectl get nodes
 ```bash
 sudo ufw allow OpenSSH
 sudo ufw allow 30080/tcp
+sudo ufw allow 30082/tcp
 sudo ufw allow 30090/tcp
 sudo ufw allow 30091/tcp
 sudo ufw --force enable
@@ -37,8 +38,11 @@ sudo ufw --force enable
 Порты:
 
 - `30080` - сайт
+- `30082` - Adminer для просмотра PostgreSQL
 - `30090` - MinIO media API
 - `30091` - MinIO console
+
+Redis наружу не открывается. Он доступен только внутри Kubernetes-кластера как сервис `redis:6379`.
 
 ## 4. Клонирование проекта
 
@@ -103,6 +107,16 @@ kubectl get svc -n pharmalab
 
 Сначала часть подов может быть в статусе `ContainerCreating` или `Init`. Через некоторое время должны остаться `Running`, а `upload-media` должен стать `Completed`.
 
+В нормальном состоянии должны быть такие рабочие части:
+
+- `frontend` - React-сайт в nginx
+- `backend` - Django API
+- `postgres` - база данных
+- `adminer` - веб-интерфейс для просмотра PostgreSQL
+- `redis` - внутренний кэш
+- `minio` - хранилище картинок и видео
+- `upload-media` - одноразовая загрузка медиа в MinIO
+
 ## 9. Открытие сайта
 
 ```text
@@ -131,11 +145,27 @@ http://IP_ВИРТУАЛЬНОЙ_МАШИНЫ:30091
 - `minioadmin`
 - `minioadmin`
 
+Adminer:
+
+```text
+http://IP_ВИРТУАЛЬНОЙ_МАШИНЫ:30082
+```
+
+Данные входа:
+
+- System: `PostgreSQL`
+- Server: `postgres`
+- Username: `postgres`
+- Password: `postgres`
+- Database: `pharmalab`
+
 ## 10. Логи
 
 ```bash
 kubectl logs -n pharmalab deployment/backend
 kubectl logs -n pharmalab deployment/frontend
+kubectl logs -n pharmalab deployment/adminer
+kubectl logs -n pharmalab deployment/redis
 kubectl logs -n pharmalab deployment/minio
 kubectl logs -n pharmalab job/upload-media
 ```
