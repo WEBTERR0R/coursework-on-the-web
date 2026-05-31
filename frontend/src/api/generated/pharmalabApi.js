@@ -12,18 +12,31 @@ const mockImageByCas = {
   '50-78-2': 'aspirin.svg',
   '103-90-2': 'paracetamol.svg',
   '15687-27-1': 'ibuprofen.svg',
-  '73-78-9': 'lidocaine.svg',
+  '26787-78-0': 'amoxicillin.svg',
+  '73590-58-6': 'omeprazole.svg',
+  '114798-26-4': 'losartan.svg',
+  '134523-00-5': 'atorvastatin.svg',
+  '79902-63-9': 'simvastatin.svg',
+  '657-24-9': 'metformin.svg',
+  '83915-83-7': 'lisinopril.svg',
+  '88150-42-9': 'amlodipine.svg',
+  '113665-84-2': 'clopidogrel.svg',
+  '83881-51-0': 'cetirizine.png',
+  '79794-75-5': 'loratadin.svg',
+  '18559-94-9': 'salbutamol.png',
+  '298-46-4': 'carbamazepine.svg',
 }
 
 function makeMockSubstance(id, data) {
   const price = Number(data.price).toFixed(2)
+  const imageFile = mockImageByCas[data.cas]
   return {
     id,
     unit: 'кг',
     is_active: true,
     storage_conditions: 'Хранить в сухом, защищённом от света месте при температуре 15-25°C',
-    image_url: assetUrl(`/mock/${mockImageByCas[data.cas] || 'generic-substance.svg'}`),
-    video_url: assetUrl('/mock/promo.mp4'),
+    image_url: imageFile ? assetUrl(`/pharmalab-media/${imageFile}`) : assetUrl('/mock/generic-substance.svg'),
+    video_url: assetUrl('/pharmalab-media/promo.mp4'),
     price: price,
     price_display: `${price} ₽/кг`,
     ...data,
