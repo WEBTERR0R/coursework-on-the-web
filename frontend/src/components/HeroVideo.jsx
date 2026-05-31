@@ -2,7 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { IS_MOCK_MODE } from '../config/runtime'
 
 const MEDIA_BASE_URL = (import.meta.env.VITE_MEDIA_BASE_URL || 'http://localhost:9000/pharmalab-media').replace(/\/$/, '')
-const PROMO_VIDEO_URL = import.meta.env.VITE_PROMO_VIDEO_URL || (IS_MOCK_MODE ? '' : `${MEDIA_BASE_URL}/promo.mp4`)
+const APP_BASE_URL = import.meta.env.BASE_URL || '/'
+const LOCAL_PROMO_VIDEO_URL = `${APP_BASE_URL}mock/promo.mp4`
+const LOCAL_PROMO_POSTER_URL = `${APP_BASE_URL}mock/hero.png`
+const PROMO_VIDEO_URL = import.meta.env.VITE_PROMO_VIDEO_URL || (IS_MOCK_MODE ? LOCAL_PROMO_VIDEO_URL : `${MEDIA_BASE_URL}/promo.mp4`)
 
 function HeroVideo() {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
@@ -39,6 +42,7 @@ function HeroVideo() {
           muted
           loop
           playsInline
+          poster={LOCAL_PROMO_POSTER_URL}
           onError={() => setVideoAvailable(false)}
         >
           <source src={PROMO_VIDEO_URL} type="video/mp4" />

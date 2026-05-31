@@ -23,7 +23,7 @@ function makeMockSubstance(id, data) {
     is_active: true,
     storage_conditions: 'Хранить в сухом, защищённом от света месте при температуре 15-25°C',
     image_url: assetUrl(`/mock/${mockImageByCas[data.cas] || 'generic-substance.svg'}`),
-    video_url: '',
+    video_url: assetUrl('/mock/promo.mp4'),
     price: price,
     price_display: `${price} ₽/кг`,
     ...data,
@@ -247,7 +247,32 @@ function makeApiError(status, detail) {
 function ensureMockUsers() {
   const users = readStorage(MOCK_STORAGE_KEYS.users, null)
   if (users?.length) {
-    if (!users.some((user) => user.username === 'moderator')) {
+    const userAccount = users.find((user) => user.username === 'user')
+    if (userAccount) {
+      Object.assign(userAccount, {
+        email: userAccount.email || 'user@pharmalab.local',
+        password: 'user123',
+        is_moderator: false,
+      })
+    } else {
+      users.push({
+        id: users.reduce((maxId, item) => Math.max(maxId, item.id), 0) + 1,
+        username: 'user',
+        email: 'user@pharmalab.local',
+        password: 'user123',
+        is_moderator: false,
+        created_at: new Date().toISOString(),
+      })
+    }
+
+    const moderatorAccount = users.find((user) => user.username === 'moderator')
+    if (moderatorAccount) {
+      Object.assign(moderatorAccount, {
+        email: moderatorAccount.email || 'moderator@pharmalab.local',
+        password: 'moderator123',
+        is_moderator: true,
+      })
+    } else {
       users.push({
         id: users.reduce((maxId, item) => Math.max(maxId, item.id), 0) + 1,
         username: 'moderator',
@@ -256,14 +281,22 @@ function ensureMockUsers() {
         is_moderator: true,
         created_at: new Date().toISOString(),
       })
-      writeStorage(MOCK_STORAGE_KEYS.users, users)
     }
+    writeStorage(MOCK_STORAGE_KEYS.users, users)
     return users
   }
 
   const seededUsers = [
     {
       id: 1,
+      username: 'user',
+      email: 'user@pharmalab.local',
+      password: 'user123',
+      is_moderator: false,
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: 2,
       username: 'moderator',
       email: 'moderator@pharmalab.local',
       password: 'moderator123',
