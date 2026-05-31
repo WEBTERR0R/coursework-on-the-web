@@ -268,7 +268,7 @@ class Command(BaseCommand):
                 'molecular_weight': Decimal('382.88'),
                 'storage_conditions': 'Хранить в сухом, защищённом от света месте при температуре 15-25°C',
                 'shelf_life': 36,
-                'image_key': 'loratadine.svg',
+                'image_key': 'loratadin.svg',
                 'video_key': '',
                 'manufacturer': 'Schering-Plough',
                 'country_of_origin': 'США',
