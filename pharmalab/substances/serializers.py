@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password
 from .models import User, Substance, Request, RequestItem
 
 
-# ========== СЕРИАЛИЗАТОРЫ ПОЛЬЗОВАТЕЛЯ ==========
+# пользователь
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор пользователя"""
@@ -89,7 +89,7 @@ class LoginSerializer(serializers.Serializer):
         return user
 
 
-# ========== СЕРИАЛИЗАТОРЫ СУБСТАНЦИЙ ==========
+# субстанции
 
 class SubstanceSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
@@ -127,7 +127,7 @@ class SubstanceCreateSerializer(serializers.ModelSerializer):
         ]
 
 
-# ========== СЕРИАЛИЗАТОРЫ ЗАЯВОК ==========
+# заявки
 
 class RequestItemSerializer(serializers.ModelSerializer):
     substance_name = serializers.CharField(source='substance.name', read_only=True)

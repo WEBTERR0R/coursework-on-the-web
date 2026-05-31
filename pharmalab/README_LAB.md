@@ -49,8 +49,26 @@ Django Admin (админка)	http://127.0.0.1:8000/admin/
 Одна заявка (id=35)	http://127.0.0.1:8000/api/requests/35/
 
 
-Swagger (удобная документация API)	http://127.0.0.1:8000/api/swagger/
+Swagger	http://127.0.0.1:8000/api/swagger/
 
 
 MinIO Console (хранилище файлов)	http://localhost:9001	minioadmin / minioadmin
 Adminer (управление БД)	http://localhost:8080	
+
+
+фронт + бэк
+ .\venv\Scripts\python.exe manage.py runserver 0.0.0.0:8000
+  npm run dev
+
+сборка пва мок
+http://127.0.0.1:4173/coursework-on-the-web/
+ npm run preview:pages
+
+ локальное апи
+ http://192.168.1.186:8000/api/substances/
+
+таури
+ C:\programs\pharmaproject\frontend\src-tauri\target\release\pharmalab_guest.exe
+ 
+ адрес айпи
+ C:\programs\pharmaproject\frontend\.env.tauri

@@ -1,4 +1,4 @@
-/* ===== GLOBAL STYLES ===== */
+/* база */
 :root {
   --primary: #0b3b5f;
   --primary-dark: #072c46;
@@ -43,7 +43,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ===== HEADER ===== */
+/* шапка */
 .app-header {
   background: var(--white);
   padding: 0.875rem 2rem;
@@ -214,14 +214,14 @@ body {
   box-shadow: 0 0 0 3px rgba(11, 59, 95, 0.1);
 }
 
-/* ===== MAIN CONTAINER ===== */
+/* основной контейнер */
 .main-container {
   max-width: 1280px;
   margin: 0 auto;
   padding: var(--content-gutter);
 }
 
-/* ===== PAGE TITLE ===== */
+/* заголовок страницы */
 .page-title {
   font-size: 1.875rem;
   font-weight: 700;
@@ -229,7 +229,7 @@ body {
   color: var(--gray-900);
 }
 
-/* ===== CATALOG GRID ===== */
+/* сетка каталога */
 .catalog-layout {
   display: flex;
   gap: 2rem;
@@ -239,12 +239,12 @@ body {
 .services-grid {
   flex: 1;
   display: grid;
-  /* Лаб. 8: минимальная ширина карточки задает количество колонок адаптивного каталога. */
+  /* ширина карточки управляет количеством колонок */
   grid-template-columns: repeat(auto-fill, minmax(var(--catalog-card-min), 1fr));
   gap: var(--catalog-grid-gap);
 }
 
-/* ===== SERVICE CARD ===== */
+/* карточка товара */
 .service-card {
   background: var(--white);
   border-radius: var(--radius-lg);
@@ -331,7 +331,7 @@ body {
   transform: translateY(-1px);
 }
 
-/* ===== SIDEBAR (корзина) ===== */
+/* боковая заявка */
 .request-sidebar-card {
   width: 280px;
   background: var(--white);
@@ -427,7 +427,7 @@ body {
   margin-top: 0.25rem;
 }
 
-/* ===== DETAIL PAGE ===== */
+/* страница товара */
 .detail-container {
   display: grid;
   grid-template-columns: minmax(360px, 0.95fr) minmax(420px, 1.05fr);
@@ -461,6 +461,22 @@ body {
   height: min(520px, 100%);
   object-fit: contain;
   filter: drop-shadow(0 22px 30px rgba(15, 23, 42, 0.12));
+}
+
+.detail-video-wrapper {
+  margin: 0 1.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: var(--shadow-sm);
+}
+
+.detail-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
 }
 
 .detail-media-caption {
@@ -604,7 +620,7 @@ body {
   font-weight: 700;
 }
 
-/* ===== FOOTER ===== */
+/* футер */
 .footer {
   background: var(--gray-900);
   color: var(--gray-300);
@@ -648,7 +664,7 @@ body {
   color: var(--gray-500);
 }
 
-/* ===== RESPONSIVE ===== */
+/* адаптив */
 @media (max-width: 1024px) {
   :root {
     --catalog-card-min: 240px;
@@ -784,7 +800,7 @@ body {
   }
 }
 
-/* Дополнительные стили */
+/* общие мелочи */
 .search-container {
   flex: 1;
   min-width: 280px;
@@ -1102,7 +1118,7 @@ body {
   background: var(--gray-800);
 }
 
-/* ===== HERO VIDEO ===== */
+/* главный экран */
 .hero-video-container {
   position: relative;
   width: 100%;
@@ -1242,7 +1258,7 @@ body {
   }
 }
 
-/* ===== CART PAGE ===== */
+/* корзина */
 .request-list {
   background: var(--white);
   border-radius: var(--radius-lg);
@@ -1393,7 +1409,7 @@ body {
 .remove-btn:hover {
   color: #b91c1c;
 }
-/* ===== SIMILAR SERVICES ===== */
+/* похожие товары */
 .similar-services {
   margin-top: 3rem;
   padding-top: 2rem;
@@ -1407,7 +1423,7 @@ body {
   color: var(--gray-800);
 }
 
-/* ===== FILTER FORM ===== */
+/* фильтр */
 .filter-form {
   margin-bottom: 2rem;
   display: flex;

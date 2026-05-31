@@ -10,7 +10,16 @@ function notifyCartUpdated(detail = {}) {
 }
 
 function normalizeCart(request) {
-  const items = request?.items || []
+  const items = [...(request?.items || [])].sort((a, b) => {
+    const firstId = Number(a.id)
+    const secondId = Number(b.id)
+
+    if (Number.isFinite(firstId) && Number.isFinite(secondId)) {
+      return firstId - secondId
+    }
+
+    return String(a.id).localeCompare(String(b.id))
+  })
   const totalQuantity = items.reduce((sum, item) => {
     const quantity = Number(item.quantity)
     return sum + (Number.isFinite(quantity) ? quantity : 0)

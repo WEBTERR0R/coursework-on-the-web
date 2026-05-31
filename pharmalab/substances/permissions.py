@@ -20,11 +20,11 @@ class IsOwnerOrModerator(permissions.BasePermission):
         if request.user.is_moderator:
             return True
         
-        # Для заявок (Request)
+        # заявки
         if hasattr(obj, 'user'):
             return obj.user == request.user
         
-        # Для позиций заявок (RequestItem)
+        # позиции заявки
         if hasattr(obj, 'request') and hasattr(obj.request, 'user'):
             return obj.request.user == request.user
         

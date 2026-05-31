@@ -5,6 +5,27 @@ function getErrorMessage(error, fallback) {
   return error?.response?.data?.error || error?.response?.data?.detail || fallback
 }
 
+function sortRequestItems(items = []) {
+  return [...items].sort((a, b) => {
+    const firstId = Number(a.id)
+    const secondId = Number(b.id)
+
+    if (Number.isFinite(firstId) && Number.isFinite(secondId)) {
+      return firstId - secondId
+    }
+
+    return String(a.id).localeCompare(String(b.id))
+  })
+}
+
+function normalizeRequest(request) {
+  if (!request) return request
+  return {
+    ...request,
+    items: sortRequestItems(request.items),
+  }
+}
+
 const initialState = {
   items: [],
   current: null,
@@ -34,7 +55,7 @@ export const fetchRequests = createAsyncThunk('requests/fetchList', async (filte
 export const fetchRequestById = createAsyncThunk('requests/fetchById', async (id, { rejectWithValue }) => {
   try {
     const response = await requestsApi.retrieve(id)
-    return response.data
+    return normalizeRequest(response.data)
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Ошибка загрузки заявки'))
   }

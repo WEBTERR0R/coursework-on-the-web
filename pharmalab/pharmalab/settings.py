@@ -6,7 +6,7 @@ import os
 import sys
 from dotenv import load_dotenv
 
-# Загрузка переменных окружения
+# env
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +20,7 @@ ALLOWED_HOSTS = os.getenv(
     'localhost,127.0.0.1,0.0.0.0,192.168.1.186'
 ).split(',')
 
-# Application definition
+# приложения
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,7 +40,6 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # CSRF полностью отключён для разработки
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -67,7 +66,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'pharmalab.wsgi.application'
 
-# Database Configuration - PostgreSQL
+# база
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -82,7 +81,7 @@ DATABASES = {
     }
 }
 
-# Password validation
+# проверка паролей
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -95,24 +94,24 @@ TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# статика
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files
+# медиа
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ========== НАСТРОЙКИ ПОЛЬЗОВАТЕЛЯ ==========
+# пользователь
 AUTH_USER_MODEL = 'substances.User'
 
-# ========== НАСТРОЙКИ СЕССИЙ (используем БД для простоты) ==========
+# сессии
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
-# ========== НАСТРОЙКИ REST FRAMEWORK ==========
+# rest framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
@@ -128,17 +127,17 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
-# ========== НАСТРОЙКИ MINIO ==========
+# настройки minio
 MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT', 'localhost:9000')
 MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY', 'minioadmin')
 MINIO_SECRET_KEY = os.getenv('MINIO_SECRET_KEY', 'minioadmin')
 MINIO_BUCKET = os.getenv('MINIO_BUCKET', 'pharmalab-media')
 MINIO_USE_SSL = os.getenv('MINIO_USE_SSL', 'False') == 'True'
 
-# Demo User ID
+# демо пользователь
 DEMO_USER_ID = int(os.getenv('DEMO_USER_ID', '1'))
 
-# CSRF и CORS настройки
+# csrf и cors
 CSRF_TRUSTED_ORIGINS = os.getenv(
     'CSRF_TRUSTED_ORIGINS',
     'http://localhost:3000,http://127.0.0.1:3000,http://192.168.1.186:3000,https://192.168.1.186:3000'

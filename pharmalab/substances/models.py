@@ -29,7 +29,7 @@ class Substance(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена", default=0)
     unit = models.CharField(max_length=20, default="кг", verbose_name="Единица измерения")
     
-    # MinIO поля
+    # minio
     image_key = models.CharField(max_length=200, null=True, blank=True, verbose_name="Ключ изображения в MinIO")
     video_key = models.CharField(max_length=200, null=True, blank=True, verbose_name="Ключ видео в MinIO")
     
@@ -40,7 +40,7 @@ class Substance(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
     
-    # Дополнительные поля
+    # описание поставки
     manufacturer = models.CharField(max_length=200, blank=True, default="", verbose_name="Производитель")
     country_of_origin = models.CharField(max_length=100, blank=True, default="", verbose_name="Страна производства")
     purity = models.DecimalField(max_digits=5, decimal_places=2, default=99.0, verbose_name="Чистота (%)")

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-const DEFAULT_IMAGE = 'https://via.placeholder.com/300x200?text=No+Image'
+const DEFAULT_IMAGE = `${import.meta.env.BASE_URL || '/'}mock/generic-substance.svg`
 
 function SubstanceCard({ substance, onAddToCart, canBuy = true }) {
   const [adding, setAdding] = useState(false)

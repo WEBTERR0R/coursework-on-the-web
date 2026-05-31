@@ -14,7 +14,7 @@ def index(request):
    
     search_query = request.GET.get('search', '')
     
-    # Получаем активные субстанции с фильтрацией
+    # активные субстанции с фильтром
     substances = Substance.objects.filter(is_active=True)
     if search_query:
         substances = substances.filter(
@@ -22,13 +22,13 @@ def index(request):
             Q(cas__icontains=search_query)
         )
     
-    # Получаем текущую заявку пользователя (черновик)
+    # текущий черновик пользователя
     current_request = Request.objects.filter(
         user_id=DEMO_USER_ID,
         status='draft'
     ).first()
     
-    # Подготовка данных для шаблона
+    # данные для шаблона
     request_id = current_request.id if current_request else None
     request_items_count = 0
     request_total = "0 ₽"
@@ -44,7 +44,7 @@ def index(request):
         )['total'] or 0
         request_total = f"{total} ₽"
     
-    # URL видео из MinIO
+    # видео из minio
     promo_video_url = "http://localhost:9000/pharmalab-media/promo.mp4"
     
     context = {
@@ -89,7 +89,7 @@ def add_to_request(request, substance_id):
     
     substance = get_object_or_404(Substance, id=substance_id, is_active=True)
     
-    # Получаем или создаем заявку-черновик (не более одной на пользователя)
+    # у пользователя один черновик
     current_request, created = Request.objects.get_or_create(
         user_id=DEMO_USER_ID,
         status='draft',
@@ -98,7 +98,7 @@ def add_to_request(request, substance_id):
         }
     )
     
-    # Добавляем или обновляем позицию в заявке
+    # добавляем или обновляем позицию
     item, item_created = RequestItem.objects.get_or_create(
         request=current_request,
         substance=substance,
@@ -115,10 +115,10 @@ def add_to_request(request, substance_id):
         item.quantity += 1
         item.save()
     
-    # Пересчитываем общую сумму заявки
+    # пересчет суммы
     current_request.calculate_total()
     
-    # Сохраняем параметр поиска при редиректе
+    # сохраняем поиск после редиректа
     search_query = request.GET.get('search', '')
     redirect_url = f"/?search={search_query}" if search_query else '/'
     return redirect(redirect_url)
@@ -141,7 +141,7 @@ def request_detail(request, request_id):
     except Request.DoesNotExist:
         raise Http404(f"Заявка №{request_id} не найдена")
     
-    # Удаленные заявки просматривать нельзя
+    # удаленные заявки не показываем
     if request_obj.status == 'deleted':
         return render(request, 'request_deleted.html', {
             'request_id': request_id,
@@ -170,7 +170,7 @@ def delete_request(request, request_id):
     
     search_query = request.GET.get('search', '')
     
-    # SQL UPDATE без ORM (требование лабораторной 2)
+    # update через sql
     with connection.cursor() as cursor:
         cursor.execute(
             """

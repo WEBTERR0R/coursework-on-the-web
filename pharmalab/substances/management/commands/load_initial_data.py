@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help = 'Load initial data for pharmalab'
 
     def handle(self, *args, **options):
-        # Создаем пользователя
+        # пользователь для демо
         user, created = User.objects.get_or_create(
             username='demo_user',
             defaults={
@@ -22,7 +22,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write(f'User exists: {user.username}')
         
-        # Создаем фармацевтические субстанции
+        # стартовые субстанции
         substances_data = [
             {
                 'name': 'Парацетамол',
@@ -324,7 +324,7 @@ class Command(BaseCommand):
                 created_count += 1
                 self.stdout.write(self.style.SUCCESS(f'Created: {substance.name}'))
             else:
-                # Обновляем существующие записи новыми данными
+                # обновляем существующую запись
                 substance.name = data['name']
                 substance.description = data['description']
                 substance.full_description = data['full_description']

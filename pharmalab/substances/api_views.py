@@ -43,7 +43,7 @@ def parse_quantity(value, default=1):
     return quantity
 
 
-# ========== АУТЕНТИФИКАЦИЯ ==========
+# авторизация
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AuthViewSet(viewsets.GenericViewSet):
@@ -119,7 +119,7 @@ class AuthViewSet(viewsets.GenericViewSet):
         return Response({'message': 'Пароль успешно изменен'})
 
 
-# ========== УСЛУГИ ==========
+# субстанции
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SubstanceViewSet(viewsets.ModelViewSet):
@@ -207,7 +207,7 @@ class SubstanceViewSet(viewsets.ModelViewSet):
         return Response({'video_url': substance.video_url})
 
 
-# ========== ЗАЯВКИ ==========
+# заявки
 
 @method_decorator(csrf_exempt, name='dispatch')
 class RequestViewSet(viewsets.ModelViewSet):
@@ -343,7 +343,7 @@ class RequestViewSet(viewsets.ModelViewSet):
         return Response({'request_id': None, 'items_count': 0})
 
 
-# ========== ПОЗИЦИИ ЗАЯВКИ ==========
+# позиции заявки
 
 @method_decorator(csrf_exempt, name='dispatch')
 class RequestItemViewSet(viewsets.ModelViewSet):
@@ -401,7 +401,7 @@ class RequestItemViewSet(viewsets.ModelViewSet):
         
         draft.calculate_total()
         
-        # Возвращаем обновлённую информацию о заявке
+        # возвращаем свежую заявку
         return Response({
             'item': RequestItemSerializer(item).data,
             'request_id': draft.id,
@@ -446,7 +446,7 @@ class RequestItemViewSet(viewsets.ModelViewSet):
             item.save()
             item.request.calculate_total()
         
-        # Возвращаем обновлённую информацию о заявке
+        # возвращаем свежую заявку
         return Response({
             'item': RequestItemSerializer(item).data,
             'request_id': item.request.id,
@@ -467,7 +467,7 @@ class RequestItemViewSet(viewsets.ModelViewSet):
         request_id = item.request.id
         item.delete()
         
-        # Получаем обновлённую заявку
+        # берем обновленную заявку
         try:
             req = Request.objects.get(id=request_id)
             req.calculate_total()

@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { API_BASE_URL, substancesApi } from '../api/generated/pharmalabApi'
+import { findSimilarSubstances } from '../services/embeddings'
 
 function getErrorMessage(error, fallback) {
   if (!error?.response && error?.message) {
@@ -45,6 +46,7 @@ const initialState = {
   filters: loadSavedFilters(),
   status: 'idle',
   currentStatus: 'idle',
+  similarStatus: 'idle',
   error: null,
 }
 
@@ -70,6 +72,14 @@ export const fetchSubstance = createAsyncThunk('substances/fetchOne', async (id,
   }
 })
 
+export const buildSimilarSubstances = createAsyncThunk(
+  'substances/buildSimilar',
+  async (_, { getState }) => {
+    const { current, items } = getState().substances
+    return findSimilarSubstances(current, items)
+  },
+)
+
 const substancesSlice = createSlice({
   name: 'substances',
   initialState,
@@ -81,29 +91,6 @@ const substancesSlice = createSlice({
     resetCatalogFilters(state) {
       state.filters = defaultFilters
       saveFilters(defaultFilters)
-    },
-    buildSimilarSubstances(state) {
-      if (!state.current) {
-        state.similar = []
-        return
-      }
-
-      const textForKeywords = `${state.current.name} ${state.current.description || ''}`.toLowerCase()
-      const keywords = textForKeywords.split(/[\s,.\-()]+/).filter((keyword) => keyword.length > 3)
-
-      state.similar = state.items
-        .filter((item) => item.id !== state.current.id)
-        .map((item) => {
-          const name = item.name.toLowerCase()
-          const description = (item.description || '').toLowerCase()
-          const similarity = keywords.reduce((score, keyword) => {
-            return score + (name.includes(keyword) ? 3 : 0) + (description.includes(keyword) ? 1 : 0)
-          }, 0)
-          return { ...item, similarity }
-        })
-        .filter((item) => item.similarity > 0)
-        .sort((a, b) => b.similarity - a.similarity)
-        .slice(0, 4)
     },
   },
   extraReducers: (builder) => {
@@ -135,8 +122,19 @@ const substancesSlice = createSlice({
         state.currentStatus = 'failed'
         state.error = action.payload
       })
+      .addCase(buildSimilarSubstances.pending, (state) => {
+        state.similarStatus = 'loading'
+      })
+      .addCase(buildSimilarSubstances.fulfilled, (state, action) => {
+        state.similarStatus = 'idle'
+        state.similar = action.payload
+      })
+      .addCase(buildSimilarSubstances.rejected, (state) => {
+        state.similarStatus = 'failed'
+        state.similar = []
+      })
   },
 })
 
-export const { buildSimilarSubstances, resetCatalogFilters, setCatalogFilters } = substancesSlice.actions
+export const { resetCatalogFilters, setCatalogFilters } = substancesSlice.actions
 export default substancesSlice.reducer

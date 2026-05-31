@@ -67,7 +67,7 @@ export const logoutUser = createAsyncThunk('auth/logout', async () => {
   try {
     await authApi.logout()
   } catch {
-    // Локальный выход все равно должен очистить интерфейс.
+    // чистим интерфейс даже если сервер уже сбросил сессию
   }
 })
 

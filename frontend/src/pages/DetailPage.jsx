@@ -6,7 +6,7 @@ import { IS_GUEST_APP } from '../config/runtime'
 import { addItemToCart } from '../store/cartSlice'
 import { buildSimilarSubstances, fetchSubstance, fetchSubstances } from '../store/substancesSlice'
 
-const DEFAULT_IMAGE = 'https://via.placeholder.com/800x450?text=No+Image'
+const DEFAULT_IMAGE = `${import.meta.env.BASE_URL || '/'}mock/generic-substance.svg`
 
 function DetailPage() {
   const { id } = useParams()
@@ -19,10 +19,11 @@ function DetailPage() {
     similar: similarServices,
     currentStatus,
     status: listStatus,
+    similarStatus,
     error,
   } = useSelector((state) => state.substances)
   const loading = currentStatus === 'loading'
-  const similarLoading = listStatus === 'loading'
+  const similarLoading = listStatus === 'loading' || similarStatus === 'loading'
 
   const redirectToLogin = useCallback(() => {
     navigate('/login', {
@@ -98,6 +99,14 @@ function DetailPage() {
               onError={(e) => { e.target.src = DEFAULT_IMAGE }}
             />
           </div>
+          {substance.video_url && (
+            <div className="detail-video-wrapper">
+              <video className="detail-video" controls preload="metadata">
+                <source src={substance.video_url} type="video/mp4" />
+                Ваш браузер не поддерживает видео
+              </video>
+            </div>
+          )}
           <div className="detail-media-caption">
             <span>Субстанция</span>
             <strong>{substance.pharmacopoeia || 'USP, EP'}</strong>
