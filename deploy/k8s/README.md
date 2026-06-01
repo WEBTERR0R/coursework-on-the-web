@@ -54,14 +54,24 @@ cd ~/pharmaproject
 
 Если используется другая ветка, замени `lab8` на свою.
 
-## 5. Подготовка IP
+## 5. Подготовка адресов
 
 ```bash
 export VM_IP=$(hostname -I | awk '{print $1}')
 echo $VM_IP
 ```
 
-Этот IP будет использоваться в настройках Django, React и MinIO.
+Если виртуальная машина работает через NAT и проброс портов VirtualBox, публичным адресом для браузера будет `127.0.0.1`:
+
+```bash
+export PUBLIC_HOST=127.0.0.1
+```
+
+Если виртуальная машина работает через сетевой мост и открывается напрямую по IP, используй IP виртуальной машины:
+
+```bash
+export PUBLIC_HOST=$VM_IP
+```
 
 ## 6. Сборка образов
 
@@ -70,7 +80,7 @@ docker build -f deploy/docker/backend.Dockerfile -t pharmalab-backend:local .
 
 docker build \
   --build-arg VITE_API_BASE_URL=/api \
-  --build-arg VITE_PROMO_VIDEO_URL=http://$VM_IP:30090/pharmalab-media/promo.mp4 \
+  --build-arg VITE_PROMO_VIDEO_URL=http://$PUBLIC_HOST:30090/pharmalab-media/promo.mp4 \
   -f deploy/docker/frontend.Dockerfile \
   -t pharmalab-frontend:local .
 
@@ -177,7 +187,7 @@ docker build -f deploy/docker/backend.Dockerfile -t pharmalab-backend:local .
 
 docker build \
   --build-arg VITE_API_BASE_URL=/api \
-  --build-arg VITE_PROMO_VIDEO_URL=http://$VM_IP:30090/pharmalab-media/promo.mp4 \
+  --build-arg VITE_PROMO_VIDEO_URL=http://$PUBLIC_HOST:30090/pharmalab-media/promo.mp4 \
   -f deploy/docker/frontend.Dockerfile \
   -t pharmalab-frontend:local .
 

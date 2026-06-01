@@ -22,17 +22,19 @@ metadata:
   namespace: pharmalab
 data:
   DEBUG: "False"
-  ALLOWED_HOSTS: "${VM_IP},localhost,127.0.0.1"
-  CSRF_TRUSTED_ORIGINS: "http://${VM_IP}:30080"
-  API_CORS_ALLOWED_ORIGINS: "http://${VM_IP}:30080,http://localhost:30080,http://127.0.0.1:30080"
+  ALLOWED_HOSTS: "${PUBLIC_HOST},${VM_IP},localhost,127.0.0.1"
+  CSRF_TRUSTED_ORIGINS: "http://${PUBLIC_HOST}:30080,http://${VM_IP}:30080"
+  API_CORS_ALLOWED_ORIGINS: "http://${PUBLIC_HOST}:30080,http://${VM_IP}:30080,http://localhost:30080,http://127.0.0.1:30080"
   DB_NAME: "pharmalab"
   DB_USER: "postgres"
   DB_HOST: "postgres"
   DB_PORT: "5432"
   REDIS_URL: "redis://redis:6379/1"
-  MINIO_ENDPOINT: "${VM_IP}:30090"
+  MINIO_ENDPOINT: "minio:9000"
+  MINIO_PUBLIC_ENDPOINT: "${PUBLIC_HOST}:30090"
   MINIO_BUCKET: "pharmalab-media"
   MINIO_USE_SSL: "False"
+  MINIO_PUBLIC_USE_SSL: "False"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

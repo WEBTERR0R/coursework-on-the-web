@@ -153,6 +153,8 @@ MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY', 'minioadmin')
 MINIO_SECRET_KEY = os.getenv('MINIO_SECRET_KEY', 'minioadmin')
 MINIO_BUCKET = os.getenv('MINIO_BUCKET', 'pharmalab-media')
 MINIO_USE_SSL = os.getenv('MINIO_USE_SSL', 'False') == 'True'
+MINIO_PUBLIC_ENDPOINT = os.getenv('MINIO_PUBLIC_ENDPOINT', MINIO_ENDPOINT)
+MINIO_PUBLIC_USE_SSL = os.getenv('MINIO_PUBLIC_USE_SSL', str(MINIO_USE_SSL)) == 'True'
 
 # демо пользователь
 DEMO_USER_ID = int(os.getenv('DEMO_USER_ID', '1'))

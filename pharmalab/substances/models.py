@@ -59,17 +59,26 @@ class Substance(models.Model):
     
     def __str__(self):
         return f"{self.name} (CAS: {self.cas})"
+
+    def _media_url(self, key):
+        endpoint = settings.MINIO_PUBLIC_ENDPOINT.rstrip('/')
+        if endpoint.startswith(('http://', 'https://')):
+            base_url = endpoint
+        else:
+            scheme = 'https' if settings.MINIO_PUBLIC_USE_SSL else 'http'
+            base_url = f"{scheme}://{endpoint}"
+        return f"{base_url}/{settings.MINIO_BUCKET}/{key}"
     
     @property
     def image_url(self):
         if self.image_key:
-            return f"http://{settings.MINIO_ENDPOINT}/{settings.MINIO_BUCKET}/{self.image_key}"
+            return self._media_url(self.image_key)
         return "https://via.placeholder.com/800x450?text=No+Image"
     
     @property
     def video_url(self):
         if self.video_key:
-            return f"http://{settings.MINIO_ENDPOINT}/{settings.MINIO_BUCKET}/{self.video_key}"
+            return self._media_url(self.video_key)
         return ""
     
     @property
